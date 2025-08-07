@@ -1,0 +1,39 @@
+name: Download data from ECMWF
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '0 1,7,14,20 * * *'
+       
+
+env:
+
+    # ECMWF API ATUTH
+    ECMWF_API_URL: ${{ secrets.ECMWF_API_URL }}
+    ECMWF_API_EMAIL: ${{ secrets.ECMWF_API_EMAIL }}
+jobs:
+    first_job:
+        name: Getting and downloading data
+        runs-on: ubuntu-latest
+        steps:
+            # Checkout repository
+            - name: checkout repo content
+              uses: actions/checkout@v3
+
+            - name: setup python
+              uses: actions/setup-python@v4
+              with:
+                python-version: '3.11'
+
+            - name: Install dependencies
+              run: |
+               pip install -r CODE/requirements.txt
+
+            - name: DOwnload data from ECMWF
+              run: |
+                cd CODE && python get_data.py
+                git config user.name github-actions
+                git config user.email github-actions@github.com
+                git add -A
+                git commit -m "Data downloaded" --allow-empty
+                git push
